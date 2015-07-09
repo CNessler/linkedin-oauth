@@ -8,6 +8,8 @@ var session = require('cookie-session');
 require('dotenv').load();
 var passport = require('passport');
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+var db = require('monk')(process.env.MONGOLAB_URI);
+var usersInfo = db.get('linkedin');
 
 
 
@@ -41,7 +43,8 @@ passport.use(new LinkedInStrategy({
     state: true
   },
   function(accessToken, refreshToken, profile, done) {
-    done(null, {id: profile.id, displayName: profile.displayName, token: accessToken})
+    usersInfo.update({id: profile.id}, {displayName: profile.displayName, token: accessToken}, {upsert: true})
+    done(null, {id: profile.id})
   }
 ));
 
